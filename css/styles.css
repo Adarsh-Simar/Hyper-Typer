@@ -1,0 +1,126 @@
+body{
+background:#0f172a;
+color:#e2e8f0;
+font-family:monospace;
+}
+
+/* Header styling */
+header{
+text-align:center;
+font-size:32px;
+font-weight:700;
+letter-spacing:2px;
+padding:25px 0;
+margin-bottom:20px;
+color:#38bdf8;
+background:#020617;
+border-bottom:1px solid #1e293b;
+box-shadow:0 4px 15px rgba(0,0,0,0.4);
+}
+
+/* optional glowing effect */
+header::after{
+content:"";
+display:block;
+width:120px;
+height:3px;
+background:#38bdf8;
+margin:10px auto 0;
+border-radius:10px;
+box-shadow:0 0 10px #38bdf8;
+}
+
+.restartBtn{
+background:#38bdf8;
+color:#020617;
+border:none;
+padding:12px 22px;
+font-size:16px;
+font-weight:600;
+border-radius:8px;
+cursor:pointer;
+transition:all 0.2s ease;
+box-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+.restartBtn:hover{
+background:#0ea5e9;
+transform:translateY(-2px);
+box-shadow:0 8px 20px rgba(0,0,0,0.5);
+}
+
+.restartBtn:active{
+transform:translateY(0);
+}
+
+
+/* Typing container */
+.typer{
+display:flex;
+justify-content:center;
+padding-top:80px;
+}
+
+/* Wrapper */
+.wrapper{
+position:relative;
+width:800px;
+font-size:22px;
+font-family:monospace;
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+}
+
+/* Reference text */
+.background-text{
+position:absolute;
+top:30px;
+left:30px;
+right:30px;
+color:#64748b;
+pointer-events:none;
+line-height:1.8;
+}
+
+/* Editable typing layer */
+.typing-input{
+position:relative;
+width:100%;
+background:transparent;
+color:transparent;
+caret-color:#38bdf8;
+border:none;
+outline:none;
+font-size:22px;
+font-family:monospace;
+line-height:1.8;
+height: 200px;
+}
+
+/* Info section */
+.infoSection{
+padding-top:80px;
+display:flex;
+justify-content:center;
+gap:80px;
+}
+
+/* Stat boxes */
+.infoSection h4{
+background:#1e293b;
+padding:15px 25px;
+border-radius:10px;
+box-shadow:0 6px 15px rgba(0,0,0,0.4);
+}
+
+/* Correct characters */
+.correctInput{
+color:#22c55e;
+}
+
+/* Wrong characters */
+.wrongInput{
+color:#ef4444;
+}

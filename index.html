@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="./scripts/typer.js" type="module" defer></script>
+    <title>Hyper Typer</title>
+</head>
+
+<body>
+    <header>
+        Hyper Typer
+    </header>
+
+    <section class="pt-2 typer">
+        <div class="wrapper">
+
+            <div class="background-text" id="typingText">
+                hello world example
+            </div>
+
+            <div class="typing-input" id="typingInput" contenteditable="true" spellcheck="false">
+            </div>
+
+        </div>
+    </section>
+
+    <div class="infoSection">
+
+        <h4>
+            Correct Word Count -
+            <span id="correctWordCount">0</span>
+        </h4>
+
+        <h4>
+            WPM -
+            <span id="wpmSpeed">0</span>
+        </h4>
+        <button id="restartBtn" class="restartBtn">
+            Type Again
+        </button>
+    </div>
+</body>
+
+</html>
