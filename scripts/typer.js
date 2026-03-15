@@ -1,6 +1,6 @@
 import { typingWords } from "./words.js";
 
-// TODO: Configs From Localstorage, Caret not moving to nextline after last word space
+// TODO: Configs From Localstorage, Caret not moving to nextline after last word space, Correct Word count is -1 -> Need to Fix
 
 // We will always start with word 0 and character 0 
 let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, timerStarted = false, timer = null;
