@@ -1,16 +1,16 @@
 import { typingWords } from "./words.js";
 
-// TODO : Correct Word Count is Wrong, Hide WPM and Show it on finish, Modularize The code 
+// TODO: Configs From Localstorage, Caret not moving to nextline after last word space
 
 // We will always start with word 0 and character 0 
-let currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false,  currWordChars = [];
+let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, timerStarted = false, timer = null;
 
 const typer = document.getElementById('typingText');
-const typerInput = document.getElementById('typingInput');
+const typerInputEl = document.getElementById('typingInput');
 const correctWordCountEl = document.getElementById('correctWordCount');
+const wpmComponentEl = document.getElementById('wpmComponent');
 const wpmEl = document.getElementById('wpmSpeed');
 const restartBtn = document.getElementById('restartBtn');
-
 var generatedWords = [];
 
 function getRandomWord() {
@@ -31,14 +31,19 @@ function generateTypingParagraph(length) {
 }
 
 function initTypingText() {
-    currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false,  currWordChars = [];
-    correctWordCountEl.innerText = 0; 
+    currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false;
+    correctWordCountEl.innerText = 0;
     generatedWords = [];
-    wpmEl.innerText = 0; 
-    typerInput.innerHTML = '';
-    var text = generateTypingParagraph(25);
+    if (timer != null && timer != undefined) {
+        clearInterval(timer);
+    }
+    wpmEl.innerText = 0;
+    wpmComponentEl.classList.add('d-none');
+    typerInputEl.innerHTML = '';
+    let numOfWords = getValue('numberOfWords')
+    var text = generateTypingParagraph(60);
     typer.innerHTML = text;
-    typerInput.focus();
+    typerInputEl.focus();
 }
 
 function restrictCursorMovement() {
@@ -60,20 +65,33 @@ function restrictCursorMovement() {
     selection.addRange(newRange);
 }
 
-function startTimer()
-{
-    let start = 0; 
+function startTimer() {
+    let start = 0;
     return setInterval(() => {
-        timeTaken = start++; 
-    },1000);
+        timeTaken = start++;
+    }, 1000);
 }
 
-function updateStats()
-{
-    let wpm = 0; 
-    wpm = Math.round((correctWordCount/timeTaken) * 60); 
-    wpmEl.innerText = wpm; 
-    
+function calculateCorrectWords() {
+    let count = 0;
+    const sentence = typerInputEl.innerText;
+    sentence.split(" ").map((word, index) => {
+        if (word === generatedWords[index]) {
+            count++;
+        }
+
+    });
+    return count;
+}
+
+function updateStats() {
+    // Calculate Correct words 
+    let correctWordCount = calculateCorrectWords();
+    correctWordCountEl.innerText = correctWordCount;
+    let wpm = 0;
+    wpm = Math.round((correctWordCount / timeTaken) * 60);
+    wpmEl.innerText = wpm;
+    wpmComponentEl.classList.remove('d-none');
 }
 
 function debug(e) {
@@ -81,14 +99,12 @@ function debug(e) {
 }
 
 // Initialize 
+initLocalStorage(); 
 initTypingText();
 
-
-typerInput.addEventListener('input', (e) => {
-   
+typerInputEl.addEventListener('input', (e) => {
     let WordLength = generatedWords[currWordIndex].length - 1;
     var currWord = document.getElementById(`${currWordIndex}`);
-     console.log(currWord,currWordIndex,currCharIndex)
     // Handle Space And Backspace 
     if (e.data == ' ' || e.inputType == 'deleteContentBackward') {
         // Space Handler
@@ -98,18 +114,10 @@ typerInput.addEventListener('input', (e) => {
                 restrictCursorMovement();
             }
             else {
-                // Check if curr Word is correct 
-                if (currWordChars.join('') == generatedWords[currWordIndex]) {
-
-                    correctWordCount++;
-                    correctWordCountEl.innerText = correctWordCount;
-                }
                 currWordIndex++;
                 currCharIndex = 0;
-                currWordChars.length = 0;
             }
-            typerInput.focus();
-
+            typerInputEl.focus();
         }
         // Backspace Handler
         else if (e.inputType == 'deleteContentBackward') {
@@ -121,25 +129,23 @@ typerInput.addEventListener('input', (e) => {
                     currWordIndex = 0;
                 }
                 currCharIndex = generatedWords[currWordIndex].length;
-                currWord = document.getElementById(`${currWordIndex}`);
+                currWord = document.getElementById(`${currWordIndex}`)
             }
             else {
-                currWordChars.pop();
                 currWord.children[currCharIndex].classList.remove('correctInput');
                 currWord.children[currCharIndex].classList.remove('wrongInput');
             }
-            typerInput.focus();
-
+            // Dont run in case of space 
+            typerInputEl.focus();
         }
 
     }
-    else if (/[a-z]$/i.test(e.data)) {
+    else {
 
-        var timer;
-        if(!timerStarted){
-            timer = startTimer(); 
-            timerStarted = true; 
-        } 
+        if (!timerStarted) {
+            timer = startTimer();
+            timerStarted = true;
+        }
 
         if (WordLength < currCharIndex) {
             restrictCursorMovement();
@@ -152,22 +158,66 @@ typerInput.addEventListener('input', (e) => {
             else {
                 currWord.children[currCharIndex].classList.add('correctInput');
             }
-
-            currWordChars.push(e.data);
             currCharIndex++;
+
             // Check if we are at last word calculate show stats and blur out of input box
             if (currWordIndex == generatedWords.length - 1) {
-                if(currCharIndex == generatedWords[currWordIndex].length)
-                {
-                    typerInput.blur(); 
-                    clearInterval(timer);   
-                    updateStats(); 
+                if (currCharIndex == generatedWords[currWordIndex].length) {
+                    typerInputEl.blur();
+                    clearInterval(timer);
+                    updateStats();
                 }
             }
         }
 
     }
 
-});     
+});
 
+// Restrict extra words insertion at place of space
+typerInputEl.addEventListener("beforeinput", (e) => {
+    let WordLength = generatedWords[currWordIndex].length;
+    if (WordLength == currCharIndex) {
+        if (e.inputType === "insertText" && e.data !== " ") {
+            e.preventDefault(); // prevent insertion of anything other than space
+        }
+    }
+});
+
+// Restart Button
 restartBtn.addEventListener('click', () => initTypingText()); 
+
+
+/*  -------------------------- Settings Handler  -------------------------- */
+
+function setValue(key,value)
+{
+    localStorage.setItem(key,value);  
+}
+
+function getValue(key)
+{
+    let value = localStorage.getItem(key);
+    
+}
+
+function initLocalStorage()
+{
+    if(!getValue('playerName'))
+    {
+        setValue('playName','Player');
+    }
+    if(!getValue('numberOfWords'))
+    {
+        setValue('numberOfWords',50); 
+    }
+    if(!getValue('typingSpeed'))
+    {
+        setValue('typingSpeed',0); 
+    }
+}
+
+function UpdateSettings()
+{
+
+}
