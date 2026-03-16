@@ -253,7 +253,6 @@ function calculateStats()
             wrongWords.push(String.fromCharCode(i)); 
         }
     });
-    debug(wrongWords)
     if(wrongWords.length > 0)
     {
         wrongWordsTextEl.innerText = wrongWords.join(', '); 
