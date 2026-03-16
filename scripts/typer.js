@@ -184,10 +184,6 @@ typerInputEl.addEventListener("beforeinput", (e) => {
         if (e.inputType === "insertText" && e.data !== " ") {
             e.preventDefault(); // prevent insertion of anything other than space
         }
-        else
-        {
-            e.data = '_';
-        }
     }
 });
 
