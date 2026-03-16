@@ -3,11 +3,12 @@ import { typingWords } from "./words.js";
 // TODO: Configs From Localstorage, Caret not moving to nextline after last word space, Correct Word count is -1 -> Need to Fix
 
 // We will always start with word 0 and character 0 
-let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, timerStarted = false, timer = null;
+let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, correctWordCount = 0, timerStarted = false, timer = null;
 
 const typer = document.getElementById('typingText');
 const typerInputEl = document.getElementById('typingInput');
 const correctWordCountEl = document.getElementById('correctWordCount');
+const correctWordCountParentEl = document.getElementById('correctWordCountEl');
 const wpmComponentEl = document.getElementById('wpmComponent');
 const wpmEl = document.getElementById('wpmSpeed');
 const restartBtn = document.getElementById('restartBtn');
@@ -33,6 +34,7 @@ function generateTypingParagraph(length) {
 function initTypingText() {
     currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false;
     correctWordCountEl.innerText = 0;
+    correctWordCountParentEl.classList.add('d-none');
     generatedWords = [];
     if (timer != null && timer != undefined) {
         clearInterval(timer);
@@ -40,8 +42,8 @@ function initTypingText() {
     wpmEl.innerText = 0;
     wpmComponentEl.classList.add('d-none');
     typerInputEl.innerHTML = '';
-    let numOfWords = getValue('numberOfWords')
-    var text = generateTypingParagraph(60);
+    let numOfWords = getValue('numberOfWords');
+    var text = generateTypingParagraph(numOfWords);
     typer.innerHTML = text;
     typerInputEl.focus();
 }
@@ -88,6 +90,7 @@ function updateStats() {
     // Calculate Correct words 
     let correctWordCount = calculateCorrectWords();
     correctWordCountEl.innerText = correctWordCount;
+    correctWordCountParentEl.classList.remove('d-none');
     let wpm = 0;
     wpm = Math.round((correctWordCount / timeTaken) * 60);
     wpmEl.innerText = wpm;
@@ -99,7 +102,7 @@ function debug(e) {
 }
 
 // Initialize 
-initLocalStorage(); 
+initLocalStorage();
 initTypingText();
 
 typerInputEl.addEventListener('input', (e) => {
@@ -181,43 +184,53 @@ typerInputEl.addEventListener("beforeinput", (e) => {
         if (e.inputType === "insertText" && e.data !== " ") {
             e.preventDefault(); // prevent insertion of anything other than space
         }
+        else
+        {
+            e.data = '_';
+        }
     }
 });
 
 // Restart Button
-restartBtn.addEventListener('click', () => initTypingText()); 
+restartBtn.addEventListener('click', () => initTypingText());
 
 
 /*  -------------------------- Settings Handler  -------------------------- */
+let playerName = document.getElementById('playerName');
+let wordsCount = document.getElementById('wordCount');
+const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
 
-function setValue(key,value)
-{
-    localStorage.setItem(key,value);  
+function setValue(key, value) {
+    localStorage.setItem(key, value);
 }
 
-function getValue(key)
-{
-    let value = localStorage.getItem(key);
-    
+function getValue(key) {
+    return localStorage[key];
 }
 
-function initLocalStorage()
-{
-    if(!getValue('playerName'))
-    {
-        setValue('playName','Player');
+function initLocalStorage() {
+    if (!getValue('playerName')) {
+        setValue('playerName', 'Player');
     }
-    if(!getValue('numberOfWords'))
-    {
-        setValue('numberOfWords',50); 
+    if (!getValue('numberOfWords')) {
+        setValue('numberOfWords', 25);
     }
-    if(!getValue('typingSpeed'))
-    {
-        setValue('typingSpeed',0); 
+    if (!getValue('typingSpeed')) {
+        setValue('typingSpeed', 0);
     }
 }
 
-function UpdateSettings()
-{
+window.openSettings = function openSettingsModal() {
+    playerName.value = getValue('playerName');
+    wordsCount.value = getValue('numberOfWords');
+    settingsModal.show();
+}
 
+window.updateSetting = function UpdateSettings() {
+    playerName = document.getElementById('playerName');
+    wordsCount = document.getElementById('wordCount');
+    setValue('playerName', playerName.value);
+    setValue('numberOfWords', wordsCount.value);
+    initTypingText();
+    settingsModal.hide();
 }

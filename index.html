@@ -19,7 +19,7 @@
     <header class="header mb-5">
         <h1 class="title">Hyper Typer</h1>
         <h5 class="p-4"></h5>
-        <button class="settings-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <button class="settings-btn" onclick="openSettings();">
             <i class="bi bi-gear-fill"></i>
         </button>
     </header>
@@ -39,7 +39,7 @@
 
     <div class="infoSection">
 
-        <h4>
+        <h4 class="d-none" id="correctWordCountEl">
             Correct Word Count -
             <span id="correctWordCount">0</span>
         </h4>
@@ -53,7 +53,7 @@
         </button>
     </div>
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
 
@@ -72,27 +72,27 @@
                     </div>
 
                     <!-- WPM Speed (Static) -->
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label class="form-label">WPM Speed</label>
                         <p class="form-control-plaintext fw-bold" id="wpmSpeed">72 WPM</p>
-                    </div>
+                    </div> -->
 
                     <!-- Number of Words -->
                     <div class="mb-3">
                         <label for="wordCount" class="form-label">Number of Words</label>
-                        <input type="number" class="form-control" id="wordCount" placeholder="Enter number of words">
+                        <input type="number" class="form-control" id="wordCount" placeholder="Enter number of words" min="10" max="150">
                     </div>
 
                     <!-- Stats Link -->
-                    <div class="mt-3">
+                    <!-- <div class="mt-3">
                         <a href="/stats.html" class="link-primary">View Detailed Stats →</a>
-                    </div>
+                    </div> -->
 
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save Result</button>
+                    <button type="button" class="btn btn-primary" onclick="updateSetting();">Save Result</button>
                 </div>
 
             </div>
