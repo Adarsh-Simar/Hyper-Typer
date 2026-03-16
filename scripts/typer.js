@@ -4,6 +4,7 @@ import { typingWords } from "./words.js";
 
 // We will always start with word 0 and character 0 
 let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, correctWordCount = 0, timerStarted = false, timer = null;
+let correctlyTypedCharFreq, incorrectlyTypedCharFreq; 
 
 const typer = document.getElementById('typingText');
 const typerInputEl = document.getElementById('typingInput');
@@ -11,6 +12,9 @@ const correctWordCountEl = document.getElementById('correctWordCount');
 const correctWordCountParentEl = document.getElementById('correctWordCountEl');
 const wpmComponentEl = document.getElementById('wpmComponent');
 const wpmEl = document.getElementById('wpmSpeed');
+const wrongWordsStatEl = document.getElementById('wrongWordsStatEl'); 
+const wrongWordsTextEl = document.getElementById('wrongWordsTextEl'); 
+
 const restartBtn = document.getElementById('restartBtn');
 var generatedWords = [];
 
@@ -33,8 +37,11 @@ function generateTypingParagraph(length) {
 
 function initTypingText() {
     currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false;
+    correctlyTypedCharFreq = new Uint16Array(128).fill(0);
+    incorrectlyTypedCharFreq = new Uint16Array(128).fill(0);  
     correctWordCountEl.innerText = 0;
     correctWordCountParentEl.classList.add('d-none');
+    wrongWordsStatEl.classList.add('d-none'); 
     generatedWords = [];
     if (timer != null && timer != undefined) {
         clearInterval(timer);
@@ -95,6 +102,7 @@ function updateStats() {
     wpm = Math.round((correctWordCount / timeTaken) * 60);
     wpmEl.innerText = wpm;
     wpmComponentEl.classList.remove('d-none');
+    calculateStats(); 
 }
 
 function debug(e) {
@@ -155,10 +163,13 @@ typerInputEl.addEventListener('input', (e) => {
         }
         // Wrong Char
         else {
-            if (e.data !== generatedWords[currWordIndex][currCharIndex]) {
+            let actualChar = generatedWords[currWordIndex][currCharIndex];
+            if (e.data !== actualChar) {
+                incorrectlyTypedCharFreq[actualChar.charCodeAt(0)]++; 
                 currWord.children[currCharIndex].classList.add('wrongInput');
             }
-            else {
+            else { 
+                correctlyTypedCharFreq[actualChar.charCodeAt(0)]++; 
                 currWord.children[currCharIndex].classList.add('correctInput');
             }
             currCharIndex++;
@@ -229,4 +240,23 @@ window.updateSetting = function UpdateSettings() {
     setValue('numberOfWords', wordsCount.value);
     initTypingText();
     settingsModal.hide();
+}
+
+
+// STATS Module 
+function calculateStats()
+{
+    let wrongWords = []
+    incorrectlyTypedCharFreq.map((c,i) => {
+        if(c > correctlyTypedCharFreq[i])
+        {
+            wrongWords.push(String.fromCharCode(i)); 
+        }
+    });
+    debug(wrongWords)
+    if(wrongWords.length > 0)
+    {
+        wrongWordsTextEl.innerText = wrongWords.join(', '); 
+        wrongWordsStatEl.classList.remove('d-none'); 
+    }
 }

@@ -38,7 +38,6 @@
     </section>
 
     <div class="infoSection">
-
         <h4 class="d-none" id="correctWordCountEl">
             Correct Word Count -
             <span id="correctWordCount">0</span>
@@ -52,6 +51,14 @@
             Type Again
         </button>
     </div>
+
+    <div class="container pt-4 d-none" id="wrongWordsStatEl">
+        You need to Foucs more on following keys:
+        <span class="text-warning" id="wrongWordsTextEl">
+            
+        </span>
+    </div>
+
     <!-- Modal -->
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -80,7 +87,8 @@
                     <!-- Number of Words -->
                     <div class="mb-3">
                         <label for="wordCount" class="form-label">Number of Words</label>
-                        <input type="number" class="form-control" id="wordCount" placeholder="Enter number of words" min="10" max="150">
+                        <input type="number" class="form-control" id="wordCount" placeholder="Enter number of words"
+                            min="10" max="150~">
                     </div>
 
                     <!-- Stats Link -->
