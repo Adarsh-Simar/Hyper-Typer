@@ -1,10 +1,10 @@
 import { typingWords } from "./words.js";
 
-// TODO: Move Caret to NextLine after we press space after entering last word of the line
+// TODO: Refactor Code and Add Proper Comments 
 
 // We will always start with word 0 and character 0 
-let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, correctWordCount = 0, timerStarted = false, timer = null;
-let correctlyTypedCharFreq, incorrectlyTypedCharFreq; 
+let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, correctWordCount = 0, timerStarted = false, timer = null, wplInput = 0;
+let correctlyTypedCharFreq, incorrectlyTypedCharFreq;
 
 const typer = document.getElementById('typingText');
 const typerInputEl = document.getElementById('typingInput');
@@ -12,8 +12,8 @@ const correctWordCountEl = document.getElementById('correctWordCount');
 const correctWordCountParentEl = document.getElementById('correctWordCountEl');
 const wpmComponentEl = document.getElementById('wpmComponent');
 const wpmEl = document.getElementById('wpmSpeed');
-const wrongWordsStatEl = document.getElementById('wrongWordsStatEl'); 
-const wrongWordsTextEl = document.getElementById('wrongWordsTextEl'); 
+const wrongWordsStatEl = document.getElementById('wrongWordsStatEl');
+const wrongWordsTextEl = document.getElementById('wrongWordsTextEl');
 
 const restartBtn = document.getElementById('restartBtn');
 var generatedWords = [];
@@ -29,19 +29,25 @@ function getRandomWord() {
 
 function generateTypingParagraph(length) {
     let paragraph = [];
+    let wordsPerLine = 0;
     for (let i = 0; i < length; i++) {
         paragraph.push(`<span class="word" id="${i}">${getRandomWord()}</span>`);
+        wordsPerLine++;
+        if (wordsPerLine == 10) {
+            paragraph.push('<br />')
+            wordsPerLine = 0;
+        }
     }
     return paragraph.join(" ");
 }
 
 function initTypingText() {
-    currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false;
+    currWordIndex = 0, currCharIndex = 0, correctWordCount = 0, timeTaken = 0, timerStarted = false, wplInput = 0;
     correctlyTypedCharFreq = new Uint16Array(128).fill(0);
-    incorrectlyTypedCharFreq = new Uint16Array(128).fill(0);  
+    incorrectlyTypedCharFreq = new Uint16Array(128).fill(0);
     correctWordCountEl.innerText = 0;
     correctWordCountParentEl.classList.add('d-none');
-    wrongWordsStatEl.classList.add('d-none'); 
+    wrongWordsStatEl.classList.add('d-none');
     generatedWords = [];
     if (timer != null && timer != undefined) {
         clearInterval(timer);
@@ -85,10 +91,10 @@ function calculateCorrectWords() {
     let count = 0;
     const sentence = typerInputEl.innerText;
     sentence.split(" ").map((word, index) => {
+        word = word.replace(/\n/g, "");
         if (word === generatedWords[index]) {
             count++;
         }
-
     });
     return count;
 }
@@ -102,7 +108,27 @@ function updateStats() {
     wpm = Math.round((correctWordCount / timeTaken) * 60);
     wpmEl.innerText = wpm;
     wpmComponentEl.classList.remove('d-none');
-    calculateStats(); 
+    calculateStats();
+}
+
+function moveCaretToNextLine() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    const newDiv = document.createElement("div");
+    newDiv.innerHTML = "<br>"; // ensures it's visible
+
+    range.collapse(false);
+    range.insertNode(newDiv);
+
+    // Move cursor inside new div
+    range.setStart(newDiv, 0);
+    range.setEnd(newDiv, 0);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
 
 function debug(e) {
@@ -127,27 +153,43 @@ typerInputEl.addEventListener('input', (e) => {
             else {
                 currWordIndex++;
                 currCharIndex = 0;
+                wplInput++;
+
+                if (wplInput == 10) {
+                    moveCaretToNextLine();
+                    wplInput = 0;
+                }
+
             }
+
             typerInputEl.focus();
         }
         // Backspace Handler
         else if (e.inputType == 'deleteContentBackward') {
-            currCharIndex--;
 
-            if (currCharIndex < 0) {
-                currWordIndex--;
-                if (currWordIndex < 0) {
-                    currWordIndex = 0;
+            if (wplInput >= 0) {
+                currCharIndex--;
+
+                if (currCharIndex < 0) {
+                    wplInput--;
+                    currWordIndex--;
+                    if (currWordIndex < 0) {
+                        currWordIndex = 0;
+                    }
+                    currCharIndex = generatedWords[currWordIndex].length;
+                    currWord = document.getElementById(`${currWordIndex}`)
                 }
-                currCharIndex = generatedWords[currWordIndex].length;
-                currWord = document.getElementById(`${currWordIndex}`)
+                else {
+
+                    currWord.children[currCharIndex].classList.remove('correctInput');
+                    currWord.children[currCharIndex].classList.remove('wrongInput');
+                }
+                // Dont run in case of space 
+                typerInputEl.focus();
             }
             else {
-                currWord.children[currCharIndex].classList.remove('correctInput');
-                currWord.children[currCharIndex].classList.remove('wrongInput');
+                wplInput = 9;
             }
-            // Dont run in case of space 
-            typerInputEl.focus();
         }
 
     }
@@ -165,11 +207,11 @@ typerInputEl.addEventListener('input', (e) => {
         else {
             let actualChar = generatedWords[currWordIndex][currCharIndex];
             if (e.data !== actualChar) {
-                incorrectlyTypedCharFreq[actualChar.charCodeAt(0)]++; 
+                incorrectlyTypedCharFreq[actualChar.charCodeAt(0)]++;
                 currWord.children[currCharIndex].classList.add('wrongInput');
             }
-            else { 
-                correctlyTypedCharFreq[actualChar.charCodeAt(0)]++; 
+            else {
+                correctlyTypedCharFreq[actualChar.charCodeAt(0)]++;
                 currWord.children[currCharIndex].classList.add('correctInput');
             }
             currCharIndex++;
@@ -201,6 +243,10 @@ typerInputEl.addEventListener("beforeinput", (e) => {
 // Restart Button
 restartBtn.addEventListener('click', () => initTypingText());
 
+// Disable Selection 
+typerInputEl.addEventListener("selectstart", (e) => {
+    e.preventDefault();
+});
 
 /*  -------------------------- Settings Handler  -------------------------- */
 let playerName = document.getElementById('playerName');
@@ -244,18 +290,17 @@ window.updateSetting = function UpdateSettings() {
 
 
 // STATS Module 
-function calculateStats()
-{
+function calculateStats() {
     let wrongWords = []
-    incorrectlyTypedCharFreq.map((c,i) => {
-        if(c > correctlyTypedCharFreq[i])
-        {
-            wrongWords.push(String.fromCharCode(i)); 
+    incorrectlyTypedCharFreq.map((c, i) => {
+        if (c > correctlyTypedCharFreq[i]) {
+            wrongWords.push(String.fromCharCode(i));
         }
     });
-    if(wrongWords.length > 0)
-    {
-        wrongWordsTextEl.innerText = wrongWords.join(', '); 
-        wrongWordsStatEl.classList.remove('d-none'); 
+    if (wrongWords.length > 0) {
+        wrongWordsTextEl.innerText = wrongWords.join(', ');
+        wrongWordsStatEl.classList.remove('d-none');
     }
 }
+
+
