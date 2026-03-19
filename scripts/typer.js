@@ -1,8 +1,6 @@
 import { typingWords } from "./words.js";
 
-// TODO: Refactor Code and Add Proper Comments 
 
-// We will always start with word 0 and character 0 
 let currWordIndex = 0, currCharIndex = 0, timeTaken = 0, correctWordCount = 0, timerStarted = false, timer = null, wplInput = 0;
 let correctlyTypedCharFreq, incorrectlyTypedCharFreq;
 
@@ -61,6 +59,14 @@ function initTypingText() {
     typerInputEl.focus();
 }
 
+function startTimer() {
+    let start = 0;
+    return setInterval(() => {
+        timeTaken = start++;
+    }, 1000);
+}
+
+// Cursor Functions
 function restrictCursorMovement() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
@@ -80,11 +86,21 @@ function restrictCursorMovement() {
     selection.addRange(newRange);
 }
 
-function startTimer() {
-    let start = 0;
-    return setInterval(() => {
-        timeTaken = start++;
-    }, 1000);
+function moveCaretToNextLine() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    const newDiv = document.createElement("div");
+    newDiv.innerHTML = "<br>";
+    range.collapse(false);
+    range.insertNode(newDiv);
+    // Move cursor inside new div
+    range.setStart(newDiv, 0);
+    range.setEnd(newDiv, 0);
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
 
 function calculateCorrectWords() {
@@ -111,34 +127,13 @@ function updateStats() {
     calculateStats();
 }
 
-function moveCaretToNextLine() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-
-    const newDiv = document.createElement("div");
-    newDiv.innerHTML = "<br>"; // ensures it's visible
-
-    range.collapse(false);
-    range.insertNode(newDiv);
-
-    // Move cursor inside new div
-    range.setStart(newDiv, 0);
-    range.setEnd(newDiv, 0);
-
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
-
-function debug(e) {
-    console.log(e);
-}
 
 // Initialize 
 initLocalStorage();
 initTypingText();
 
+
+// Event Listeners 
 typerInputEl.addEventListener('input', (e) => {
     let WordLength = generatedWords[currWordIndex].length - 1;
     var currWord = document.getElementById(`${currWordIndex}`);
@@ -154,14 +149,12 @@ typerInputEl.addEventListener('input', (e) => {
                 currWordIndex++;
                 currCharIndex = 0;
                 wplInput++;
-
+                // Move caret to next line upon Typing 10 words in a line
                 if (wplInput == 10) {
                     moveCaretToNextLine();
                     wplInput = 0;
                 }
-
             }
-
             typerInputEl.focus();
         }
         // Backspace Handler
@@ -169,7 +162,6 @@ typerInputEl.addEventListener('input', (e) => {
 
             if (wplInput >= 0) {
                 currCharIndex--;
-
                 if (currCharIndex < 0) {
                     wplInput--;
                     currWordIndex--;
@@ -180,7 +172,6 @@ typerInputEl.addEventListener('input', (e) => {
                     currWord = document.getElementById(`${currWordIndex}`)
                 }
                 else {
-
                     currWord.children[currCharIndex].classList.remove('correctInput');
                     currWord.children[currCharIndex].classList.remove('wrongInput');
                 }
@@ -191,10 +182,8 @@ typerInputEl.addEventListener('input', (e) => {
                 wplInput = 9;
             }
         }
-
     }
     else {
-
         if (!timerStarted) {
             timer = startTimer();
             timerStarted = true;
@@ -215,7 +204,6 @@ typerInputEl.addEventListener('input', (e) => {
                 currWord.children[currCharIndex].classList.add('correctInput');
             }
             currCharIndex++;
-
             // Check if we are at last word calculate show stats and blur out of input box
             if (currWordIndex == generatedWords.length - 1) {
                 if (currCharIndex == generatedWords[currWordIndex].length) {
@@ -225,9 +213,7 @@ typerInputEl.addEventListener('input', (e) => {
                 }
             }
         }
-
     }
-
 });
 
 // Restrict extra words insertion at place of space
